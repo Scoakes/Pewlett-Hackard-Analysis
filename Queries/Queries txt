@@ -1,0 +1,92 @@
+--Find retirement age employees 
+SELECT * 
+INTO retirement_age_emp
+FROM employees 
+WHERE birth_date BETWEEN '1951-01-01' AND '1955-12-31'
+
+--Join tables 
+
+SELECT DISTINCT (e.emp_no), 
+e.first_name,
+e.last_name,
+t.title,
+t.from_date,
+t.to_date
+INTO employees_w_titles
+FROM retirement_age_emp as e 
+INNER JOIN titles as t 
+ON e.emp_no = t.emp_no;
+
+--Inspect new table
+SELECT *
+FROM employees_w_titles 
+ORDER BY emp_no
+--Why are there repeated employee numbers when I ran distinct?
+
+--Count Employees 
+SELECT COUNT(first_name)
+FROM employees_w_titles
+
+--Remove duplicate employees 
+SELECT DISTINCT ON (emp_no) emp_no, first_name, last_name, title, from_date,to_date
+INTO unique_employee_w_titles
+FROM employees_w_titles
+ORDER BY emp_no
+
+--Check new table
+SELECT *
+FROM unique_employee_w_titles
+
+--Order new table 
+SELECT *
+INTO Unique_titles_ordered
+FROM unique_employee_w_titles
+ORDER BY emp_no ASC, to_date DESC
+
+--Check new table
+SELECT *
+FROM unique_titles_ordered
+
+--Count number of retiring employees
+SELECT COUNT(emp_no), title
+INTO retiring_titles
+FROM unique_titles_ordered
+GROUP BY title
+ORDER BY count DESC
+
+--Inspect new table
+SELECT *
+FROM retiring_titles
+
+--Create mentorship table
+SELECT DISTINCT (e.emp_no), 
+e.first_name,
+e.last_name,
+e.birth_date,
+t.from_date,
+t.to_date
+INTO mentor_no_titles
+FROM employees as e 
+INNER JOIN dept_emp as t 
+ON e.emp_no = t.emp_no
+WHERE e.birth_date BETWEEN '1965-01-01' AND '1965-12-31';
+
+DROP TABLE mentor_no_titles
+
+
+SELECT DISTINCT ON (e.emp_no) e.emp_no,
+e.first_name,
+e.last_name,
+e.birth_date,
+e.from_date,
+e.to_date,
+t.title
+INTO mentorship_eli 
+From mentor_no_titles as e 
+INNER JOIN titles as t 
+ON e.emp_no = t.emp_no
+
+--Check distinct emp no
+SELECT *
+FROM mentorship_eli 
+ORDER BY emp_no
